@@ -17,9 +17,7 @@ local function isCharacterPart(part)
     return false
 end
 
--- ------------------------------------------------
 -- Snapshot every BasePart color in the workspace
--- ------------------------------------------------
 local colorCount = 0
 for _, obj in ipairs(Workspace:GetDescendants()) do
     if obj:IsA("BasePart") and not isCharacterPart(obj) then
@@ -30,7 +28,6 @@ for _, obj in ipairs(Workspace:GetDescendants()) do
     end
 end
 
--- Also snapshot colors of parts that load in later
 Workspace.DescendantAdded:Connect(function(obj)
     task.defer(function()
         if obj:IsA("BasePart") and not isCharacterPart(obj) then
@@ -43,9 +40,6 @@ Workspace.DescendantAdded:Connect(function(obj)
     end)
 end)
 
--- ------------------------------------------------
--- Snapshot all Lighting properties
--- ------------------------------------------------
 local L = getgenv().ORIGINAL_LIGHTING
 L.Technology               = Lighting.Technology
 L.Ambient                  = Lighting.Ambient
@@ -64,9 +58,6 @@ L.ExposureCompensation     = Lighting.ExposureCompensation
 L.ClockTime                = Lighting.ClockTime
 L.GeographicLatitude       = Lighting.GeographicLatitude
 
--- ------------------------------------------------
--- Snapshot existing Sky if present
--- ------------------------------------------------
 local existingSky = Lighting:FindFirstChildOfClass("Sky")
 if existingSky then
     getgenv().ORIGINAL_SKY = {
@@ -81,9 +72,6 @@ if existingSky then
     }
 end
 
--- ------------------------------------------------
--- Snapshot existing Atmosphere if present
--- ------------------------------------------------
 local existingAtmo = Lighting:FindFirstChildOfClass("Atmosphere")
 if existingAtmo then
     getgenv().ORIGINAL_ATMO = {
@@ -96,9 +84,6 @@ if existingAtmo then
     }
 end
 
--- ------------------------------------------------
--- Snapshot Terrain water
--- ------------------------------------------------
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 if Terrain then
     getgenv().ORIGINAL_WATER = {
@@ -112,117 +97,103 @@ end
 
 print(string.format("[Snapshot] Ready. Saved %d part colors, lighting, sky, atmosphere & water. Safe to run shaders.", colorCount))
 
--- LocalScript in StarterPlayerScripts
+-- ==========================================
+-- CUSTOM THEME: NIGHT SKY
+-- ==========================================
 
-local Workspace = game:GetService("Workspace")
-local Players = game:GetService("Players")
-
-local function isCharacterPart(part)
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player.Character and part:IsDescendantOf(player.Character) then
-            return true
-        end
-    end
-    return false
-end
-
-local function applyDarkGrey(part)
+local function applyNightSky(part)
     if part:IsA("BasePart") or part:IsA("Terrain") then
         if isCharacterPart(part) then return end
 
         if part:IsA("Terrain") then
-            part.WaterColor = Color3.fromRGB(60, 60, 60)
+            part.WaterColor = Color3.fromRGB(20, 100, 140)
+            part.WaterReflectance = 1
         else
-            local c = part.Color
-            local grey = (0.299 * c.R + 0.587 * c.G + 0.114 * c.B) * 0.4
-            part.Color = Color3.new(grey, grey, grey)
+            part.Color = part.Color
         end
     end
 end
 
 for _, obj in ipairs(Workspace:GetDescendants()) do
-    applyDarkGrey(obj)
+    applyNightSky(obj)
 end
+Workspace.DescendantAdded:Connect(applyNightSky)
 
-Workspace.DescendantAdded:Connect(applyDarkGrey)
+Lighting:ClearAllChildren()
 
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local Players = game:GetService("Players")
-local Lighting = game:GetService("Lighting")
-local Camera = Workspace.CurrentCamera
-local LocalPlayer = Players.LocalPlayer
-local Terrain = Workspace:FindFirstChildOfClass("Terrain") or Instance.new("Terrain",Workspace)
-
-getgenv().GI_SYSTEM = getgenv().GI_SYSTEM or {}
-local GI = getgenv().GI_SYSTEM
-
-for _,v in pairs(Lighting:GetChildren()) do
-	if v:IsA("Sky") then v:Destroy() end
-end
-
-Lighting.Technology = Enum.Technology.Unified
-Lighting.Ambient = Color3.fromRGB(65,61,86)
-Lighting.Brightness = 3.6
-Lighting.EnvironmentDiffuseScale = 0.1
+-- RTX Lighting settings
+Lighting.Technology = Enum.Technology.Future -- Forces the best lighting rendering for RTX vibes
+Lighting.Ambient = Color3.fromRGB(70, 70, 70)
+Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
+Lighting.Brightness = 3
+Lighting.ColorShift_Bottom = Color3.fromRGB(0, 0, 0)
+Lighting.ColorShift_Top = Color3.fromRGB(0, 0, 0)
+Lighting.EnvironmentDiffuseScale = 1
 Lighting.EnvironmentSpecularScale = 1
 Lighting.GlobalShadows = true
-Lighting.OutdoorAmbient = Color3.fromRGB(160,160,160)
-Lighting.ShadowSoftness = 0.5
-Lighting.GeographicLatitude = 41.733
-Lighting.ExposureCompensation = 0.2
-Lighting.FogColor = Color3.fromRGB(192,192,192)
-Lighting.FogEnd = 100000
-Lighting.ClockTime = 6.5
+Lighting.ClockTime = 14.5
+Lighting.GeographicLatitude = 0
+Lighting.ExposureCompensation = 0
 
-Terrain.WaterColor = Color3.fromRGB(12,81,89)
-Terrain.WaterReflectance = 1
-Terrain.WaterTransparency = 0.11
-Terrain.WaterWaveSize = 0.45
-Terrain.WaterWaveSpeed = 25
+-- Sky "NIGHT"
+local Sky1 = Instance.new("Sky")
+Sky1.Name = "NIGHT"
+Sky1.MoonAngularSize = 11
+Sky1.MoonTextureId = "rbxasset://sky/moon.jpg"
+Sky1.SkyboxBk = "rbxassetid://12064107"
+Sky1.SkyboxDn = "rbxassetid://12064152"
+Sky1.SkyboxFt = "rbxassetid://12064121"
+Sky1.SkyboxLf = "rbxassetid://12063984"
+Sky1.SkyboxRt = "rbxassetid://12064115"
+Sky1.SkyboxUp = "rbxassetid://12064131"
+Sky1.StarCount = 0
+Sky1.SunAngularSize = 21
+Sky1.SunTextureId = "rbxasset://sky/sun.jpg"
+Sky1.CelestialBodiesShown = false
+Sky1.Parent = Lighting
 
-local sunrays = Instance.new("SunRaysEffect", Lighting)
-sunrays.Intensity = 0.03
-sunrays.Spread = 0.128
 
-local atmosphere = Instance.new("Atmosphere", Lighting)
-atmosphere.Density = 0.3
-atmosphere.Decay = Color3.fromRGB(199,174,164)
-atmosphere.Color = Color3.fromRGB(125,113,110)
-atmosphere.Glare = 0.67
-atmosphere.Haze = 0
 
-local dof = Instance.new("DepthOfFieldEffect", Lighting)
-dof.FarIntensity = 0.7
-dof.FocusDistance = 0.05
-dof.InFocusRadius = 50
+-- Atmosphere 1
+local Atmo1 = Instance.new("Atmosphere")
+Atmo1.Name = "Atmosphere"
+Atmo1.Density = 0.3
+Atmo1.Offset = 0.25
+Atmo1.Color = Color3.fromRGB(199, 199, 199)
+Atmo1.Decay = Color3.fromRGB(106, 112, 125)
+Atmo1.Glare = 0
+Atmo1.Haze = 0
+Atmo1.Parent = Lighting
 
-local clouds = Instance.new("Clouds", Lighting)
-clouds.Cover = 0.6
-clouds.Density = 0.5
-clouds.Color = Color3.fromRGB(225,246,217)
+-- Bloom from Screenshot
+local Bloom = Instance.new("BloomEffect")
+Bloom.Enabled = true
+Bloom.Intensity = 1
+Bloom.Size = 24
+Bloom.Threshold = 2
+Bloom.Parent = Lighting
 
-local sky = Instance.new("Sky")
-sky.SkyboxBk = "rbxassetid://1618912481"
-sky.SkyboxFt = "rbxassetid://1618913244"
-sky.SkyboxLf = "rbxassetid://1618912849"
-sky.SkyboxRt = "rbxassetid://1618911568"
-sky.SkyboxUp = "rbxassetid://1618913654"
-sky.SkyboxDn = "rbxassetid://1618913943"
-sky.Parent = Lighting
+-- Depth of Field from Screenshot
+local DepthOfField = Instance.new("DepthOfFieldEffect")
+DepthOfField.Enabled = true
+DepthOfField.FarIntensity = 0.1
+DepthOfField.NearIntensity = 0.75
+DepthOfField.FocusDistance = 0.05
+DepthOfField.InFocusRadius = 30
+DepthOfField.Parent = Lighting
 
-spawn(function()
-	while true do
-		Terrain.WaterWaveSpeed = 25 + math.sin(tick()*0.5)*15
-		Terrain.WaterWaveSize = 0.45 + math.sin(tick()*0.3)*0.2
-		task.wait(0.1)
-	end
-end)
+-- Color Correction from Screenshot
+local ColorCorrection = Instance.new("ColorCorrectionEffect")
+ColorCorrection.Enabled = true
+ColorCorrection.Brightness = 0
+ColorCorrection.Contrast = 0
+ColorCorrection.Saturation = 0
+ColorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
+ColorCorrection.Parent = Lighting
 
-RunService.RenderStepped:Connect(function()
-	if Workspace:FindFirstChildOfClass("Terrain") then
-		clouds.Parent = Lighting
-	else
-		clouds.Parent = nil
-	end
-end)
+-- SunRays from Screenshot
+local SunRays = Instance.new("SunRaysEffect")
+SunRays.Enabled = true
+SunRays.Intensity = 0.01
+SunRays.Spread = 0.1
+SunRays.Parent = Lighting
