@@ -104,14 +104,14 @@ print(string.format("[Snapshot] Ready. Saved %d part colors, lighting, sky, atmo
 local function applyAurora(part)
     if part:IsA("BasePart") or part:IsA("Terrain") then
         if isCharacterPart(part) then return end
+        if part.Name == "ZenTile" then return end
 
         if part:IsA("Terrain") then
             part.WaterColor = Color3.fromRGB(20, 100, 140)
             part.WaterReflectance = 1
         else
-            -- RTX Vibes: Leave the original color alone. The Future lighting 
-            -- and SpecularScale will naturally give it that RTX look!
-            part.Color = part.Color
+            local origColor = getgenv().ORIGINAL_COLORS[part] or part.Color
+            part.Color = origColor:Lerp(Color3.fromRGB(40, 80, 120), 0.85) -- 85% strength so it's obvious!
         end
     end
 end
@@ -124,17 +124,18 @@ Workspace.DescendantAdded:Connect(applyAurora)
 Lighting:ClearAllChildren()
 
 -- RTX Lighting settings
-Lighting.Technology = Enum.Technology.Future -- Forces the best lighting rendering for RTX vibes
-Lighting.Ambient = Color3.fromRGB(70, 70, 70)
-Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
+Lighting.Technology = Enum.Technology.Future
+Lighting.Ambient = Color3.fromRGB(60, 70, 85)
+Lighting.OutdoorAmbient = Color3.fromRGB(60, 70, 85)
 Lighting.Brightness = 3
-Lighting.ColorShift_Bottom = Color3.fromRGB(0, 0, 0)
-Lighting.ColorShift_Top = Color3.fromRGB(0, 0, 0)
+Lighting.ColorShift_Bottom = Color3.fromRGB(10, 20, 40)
+Lighting.ColorShift_Top = Color3.fromRGB(150, 220, 255) -- Light blue light
 Lighting.EnvironmentDiffuseScale = 1
 Lighting.EnvironmentSpecularScale = 1
 Lighting.GlobalShadows = true
-Lighting.ClockTime = 14.5
-Lighting.GeographicLatitude = 0
+Lighting.ShadowSoftness = 0.1
+Lighting.ClockTime = 14.0 -- Midday so the light isn't naturally orange
+Lighting.GeographicLatitude = 80 -- Pushes the sun down to the horizon for long shadows!
 Lighting.ExposureCompensation = 0
 
 -- Skybox 1
@@ -154,46 +155,62 @@ Sky1.SunTextureId = "rbxassetid://1084351190"
 Sky1.CelestialBodiesShown = true
 Sky1.Parent = Lighting
 
--- Atmosphere 1
+-- Atmosphere (Deep, rich magical fog for Aurora RTX vibe)
 local Atmo1 = Instance.new("Atmosphere")
 Atmo1.Name = "Atmosphere"
-Atmo1.Density = 0.3
-Atmo1.Offset = 0
-Atmo1.Color = Color3.fromRGB(3, 3, 49)
-Atmo1.Decay = Color3.fromRGB(61, 89, 125)
-Atmo1.Glare = 0.49
+Atmo1.Density = 0.35
+Atmo1.Offset = 0.2
+Atmo1.Color = Color3.fromRGB(40, 80, 120)
+Atmo1.Decay = Color3.fromRGB(20, 40, 80)
+Atmo1.Glare = 0.4
 Atmo1.Haze = 0.5
 Atmo1.Parent = Lighting
 
--- Bloom from Screenshot
+-- Bloom (Subtle glow for the aurora)
 local Bloom = Instance.new("BloomEffect")
 Bloom.Enabled = true
-Bloom.Intensity = 1
-Bloom.Size = 24
-Bloom.Threshold = 2
+Bloom.Intensity = 1.0
+Bloom.Size = 30
+Bloom.Threshold = 1.0
 Bloom.Parent = Lighting
 
--- Depth of Field from Screenshot
+-- Depth of Field (DSLR RTX focus)
 local DepthOfField = Instance.new("DepthOfFieldEffect")
 DepthOfField.Enabled = true
-DepthOfField.FarIntensity = 0.1
+DepthOfField.FarIntensity = 0.15
 DepthOfField.NearIntensity = 0.75
 DepthOfField.FocusDistance = 0.05
 DepthOfField.InFocusRadius = 30
 DepthOfField.Parent = Lighting
 
--- Color Correction from Screenshot
+-- Color Correction (Cinematic contrast, boosted magical colors)
 local ColorCorrection = Instance.new("ColorCorrectionEffect")
 ColorCorrection.Enabled = true
-ColorCorrection.Brightness = 0
-ColorCorrection.Contrast = 0
-ColorCorrection.Saturation = 0
-ColorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
+ColorCorrection.Brightness = 0.02
+ColorCorrection.Contrast = 0.2
+ColorCorrection.Saturation = 0.15
+ColorCorrection.TintColor = Color3.fromRGB(200, 230, 255) -- Light blue tint for the whole scene
 ColorCorrection.Parent = Lighting
 
--- SunRays from Screenshot
+-- SunRays (Reverted to subtle)
 local SunRays = Instance.new("SunRaysEffect")
 SunRays.Enabled = true
-SunRays.Intensity = 0.01
-SunRays.Spread = 0.1
+SunRays.Intensity = 0.05
+SunRays.Spread = 0.5
 SunRays.Parent = Lighting
+
+-- RTX Terrain & Volumetric Clouds
+if Workspace:FindFirstChildOfClass("Terrain") then
+    Workspace.Terrain.Decoration = true
+    
+    for _, c in ipairs(Workspace.Terrain:GetChildren()) do
+        if c:IsA("Clouds") then c:Destroy() end
+    end
+    
+    local Clouds = Instance.new("Clouds")
+    Clouds.Name = "RTX_Clouds"
+    Clouds.Cover = 0.9 -- Extremely high
+    Clouds.Density = 0.8 -- Thicker
+    Clouds.Color = Color3.fromRGB(150, 180, 200)
+    Clouds.Parent = Workspace.Terrain
+end

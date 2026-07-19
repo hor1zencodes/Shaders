@@ -110,7 +110,8 @@ local function applyAesthetic(part)
             part.WaterColor = Color3.fromRGB(20, 100, 140)
             part.WaterReflectance = 1
         else
-            part.Color = part.Color
+            local origColor = getgenv().ORIGINAL_COLORS[part] or part.Color
+            part.Color = origColor:Lerp(Color3.fromRGB(255, 200, 180), 0.85) -- 85% strength so it's obvious!
         end
     end
 end
@@ -126,53 +127,90 @@ Lighting:ClearAllChildren()
 Lighting.Technology = Enum.Technology.Future
 Lighting.Ambient = Color3.fromRGB(70, 70, 70)
 Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
-Lighting.Brightness = 3
+Lighting.Brightness = 2.5 -- Restored brightness so the world isn't flat
 Lighting.ColorShift_Bottom = Color3.fromRGB(0, 0, 0)
-Lighting.ColorShift_Top = Color3.fromRGB(0, 0, 0)
+Lighting.ColorShift_Top = Color3.fromRGB(255, 237, 219)
 Lighting.EnvironmentDiffuseScale = 1
 Lighting.EnvironmentSpecularScale = 1
 Lighting.GlobalShadows = true
-Lighting.ClockTime = 14.5
+Lighting.ShadowSoftness = 0.1
+Lighting.ClockTime = 17.5
 Lighting.GeographicLatitude = 0
 Lighting.ExposureCompensation = 0
 
--- Sky
-local Sky = Instance.new("Sky")
-Sky.Name = "Sky"
-Sky.MoonAngularSize = 11
-Sky.MoonTextureId = "rbxasset://sky/moon.jpg"
-Sky.SkyboxBk = "rbxassetid://600830446"
-Sky.SkyboxDn = "rbxassetid://600831635"
-Sky.SkyboxFt = "rbxassetid://600832720"
-Sky.SkyboxLf = "rbxassetid://600886090"
-Sky.SkyboxRt = "rbxassetid://600833862"
-Sky.SkyboxUp = "rbxassetid://600835177"
-Sky.StarCount = 3000
-Sky.SunAngularSize = 21
-Sky.SunTextureId = "rbxasset://sky/sun.jpg"
-Sky.CelestialBodiesShown = false
-Sky.Parent = Lighting
+-- Skybox 1
+local Sky1 = Instance.new("Sky")
+Sky1.Name = "Sky"
+Sky1.MoonAngularSize = 11
+Sky1.MoonTextureId = "rbxasset://sky/moon.jpg"
+Sky1.SkyboxBk = "rbxassetid://600830446"
+Sky1.SkyboxDn = "rbxassetid://600831635"
+Sky1.SkyboxFt = "rbxassetid://600832720"
+Sky1.SkyboxLf = "rbxassetid://600886090"
+Sky1.SkyboxRt = "rbxassetid://600833862"
+Sky1.SkyboxUp = "rbxassetid://600835177"
+Sky1.StarCount = 3000
+Sky1.SunAngularSize = 21
+Sky1.SunTextureId = "rbxassetid://1084351190"
+Sky1.CelestialBodiesShown = false
+Sky1.Parent = Lighting
+
+-- Atmosphere (Warm, soft vibe)
+local Atmo1 = Instance.new("Atmosphere")
+Atmo1.Name = "Atmosphere"
+Atmo1.Density = 0.4
+Atmo1.Offset = 0.25
+Atmo1.Color = Color3.fromRGB(255, 170, 150)
+Atmo1.Decay = Color3.fromRGB(255, 120, 100)
+Atmo1.Glare = 0.3 -- Restored some glare for the sun glow
+Atmo1.Haze = 0.5
+Atmo1.Parent = Lighting
 
 -- Bloom
 local Bloom = Instance.new("BloomEffect")
 Bloom.Enabled = true
-Bloom.Intensity = 0.053
-Bloom.Size = 56
-Bloom.Threshold = 0.5
+Bloom.Intensity = 0.65 -- Brought back the glow, but lower than the original 0.8
+Bloom.Size = 36
+Bloom.Threshold = 0.85 -- Lowered threshold so normal light can glow again
 Bloom.Parent = Lighting
+
+-- Depth of Field (DSLR RTX focus)
+local DepthOfField = Instance.new("DepthOfFieldEffect")
+DepthOfField.Enabled = true
+DepthOfField.FarIntensity = 0.15
+DepthOfField.NearIntensity = 0.75
+DepthOfField.FocusDistance = 0.05
+DepthOfField.InFocusRadius = 30
+DepthOfField.Parent = Lighting
 
 -- Color Correction
 local ColorCorrection = Instance.new("ColorCorrectionEffect")
 ColorCorrection.Enabled = true
-ColorCorrection.Brightness = 0
-ColorCorrection.Contrast = 0.3
-ColorCorrection.Saturation = 0.1
+ColorCorrection.Brightness = 0.05
+ColorCorrection.Contrast = 0.35
+ColorCorrection.Saturation = 0.2
 ColorCorrection.TintColor = Color3.fromRGB(181, 168, 135)
 ColorCorrection.Parent = Lighting
 
 -- SunRays
 local SunRays = Instance.new("SunRaysEffect")
 SunRays.Enabled = true
-SunRays.Intensity = 0.5
+SunRays.Intensity = 0.4
 SunRays.Spread = 2
 SunRays.Parent = Lighting
+
+-- RTX Terrain & Volumetric Clouds
+if Workspace:FindFirstChildOfClass("Terrain") then
+    Workspace.Terrain.Decoration = true
+    
+    for _, c in ipairs(Workspace.Terrain:GetChildren()) do
+        if c:IsA("Clouds") then c:Destroy() end
+    end
+    
+    local Clouds = Instance.new("Clouds")
+    Clouds.Name = "RTX_Clouds"
+    Clouds.Cover = 0.9 -- Extremely high so it's obvious
+    Clouds.Density = 1.0 -- Extremely high so it's obvious
+    Clouds.Color = Color3.fromRGB(255, 220, 200)
+    Clouds.Parent = Workspace.Terrain
+end

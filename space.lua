@@ -136,6 +136,7 @@ local grayCache = {}
 
 local function makeGray(part)
     if not part:IsA('BasePart') then return end
+    if part.Name == "ZenTile" then return end
     if grayCache[part] then return end
     if isAvatarPart(part) then return end
 
@@ -255,6 +256,7 @@ end
 local function applyLightGrey(part)
     if part:IsA("BasePart") or part:IsA("Terrain") then
         if isCharacterPart(part) then return end
+        if part.Name == "ZenTile" then return end
 
         if part:IsA("Terrain") then
             part.WaterColor = Color3.fromRGB(200, 200, 200)

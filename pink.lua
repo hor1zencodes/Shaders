@@ -120,6 +120,7 @@ local function applyLightPink(part)
     if part:IsA("BasePart") or part:IsA("Terrain") then
         local char = game.Players.LocalPlayer.Character
         if char and part:IsDescendantOf(char) then return end
+        if part.Name == "ZenTile" then return end
 
         if part:IsA("Terrain") then
             part.WaterColor = Color3.fromRGB(255, 200, 220)

@@ -81,8 +81,8 @@ end
 -- STEP 4: RESTORE SKY
 -- ================================================
 local skyData = getgenv().ORIGINAL_SKY
-local Sky = Instance.new("Sky")
 if skyData then
+    local Sky = Instance.new("Sky")
     Sky.SkyboxBk             = skyData.SkyboxBk
     Sky.SkyboxDn             = skyData.SkyboxDn
     Sky.SkyboxFt             = skyData.SkyboxFt
@@ -91,45 +91,28 @@ if skyData then
     Sky.SkyboxUp             = skyData.SkyboxUp
     Sky.CelestialBodiesShown = skyData.CelestialBodiesShown
     Sky.StarCount            = skyData.StarCount
+    Sky.Parent = Lighting
 else
-    Sky.SkyboxBk = "rbxasset://sky/sky512_bk.tex"
-    Sky.SkyboxDn = "rbxasset://sky/sky512_dn.tex"
-    Sky.SkyboxFt = "rbxasset://sky/sky512_ft.tex"
-    Sky.SkyboxLf = "rbxasset://sky/sky512_lf.tex"
-    Sky.SkyboxRt = "rbxasset://sky/sky512_rt.tex"
-    Sky.SkyboxUp = "rbxasset://sky/sky512_up.tex"
-    Sky.CelestialBodiesShown = true
-    Sky.StarCount = 3000
+    print("[Reset] No sky snapshot — leaving default procedural sky.")
 end
-Sky.Parent = Lighting
 
 -- ================================================
--- STEP 5: RESTORE ATMOSPHERE — NO HAZE, NO GLARE
--- This is what fixes the fog/haze still visible.
--- If snapshot exists use it, otherwise use
--- fully neutral values (zero haze, zero glare).
+-- STEP 5: RESTORE ATMOSPHERE
 -- ================================================
 local atmoData = getgenv().ORIGINAL_ATMO
-local Atmo = Instance.new("Atmosphere")
 if atmoData then
+    local Atmo = Instance.new("Atmosphere")
     Atmo.Density = atmoData.Density
     Atmo.Offset  = atmoData.Offset
     Atmo.Color   = atmoData.Color
     Atmo.Decay   = atmoData.Decay
     Atmo.Glare   = atmoData.Glare
     Atmo.Haze    = atmoData.Haze
+    Atmo.Parent = Lighting
     print("[Reset] Atmosphere restored from snapshot.")
 else
-    -- Fully neutral — zero haze, zero glare, no tint
-    Atmo.Density = 0
-    Atmo.Offset  = 0
-    Atmo.Color   = Color3.fromRGB(199, 199, 199)
-    Atmo.Decay   = Color3.fromRGB(106, 127, 153)
-    Atmo.Glare   = 0
-    Atmo.Haze    = 0
-    print("[Reset] No snapshot — clean zero atmosphere applied.")
+    print("[Reset] No snapshot — leaving default lighting without Atmosphere.")
 end
-Atmo.Parent = Lighting
 
 -- Explicit extra kill on bloom just in case anything re-added it
 task.wait(0.05)

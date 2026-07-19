@@ -103,13 +103,15 @@ print(string.format("[Snapshot] Ready. Saved %d part colors, lighting, sky, atmo
 
 local function applyAnime(part)
     if part:IsA("BasePart") or part:IsA("Terrain") then
-        if isCharacterPart(part) then return end
-
+        local char = game.Players.LocalPlayer.Character
+        if char and part:IsDescendantOf(char) then return end
+        if part.Name == "ZenTile" then return end
         if part:IsA("Terrain") then
             part.WaterColor = Color3.fromRGB(20, 100, 140)
             part.WaterReflectance = 1
         else
-            part.Color = part.Color
+            local origColor = getgenv().ORIGINAL_COLORS[part] or part.Color
+            part.Color = origColor:Lerp(Color3.fromRGB(150, 220, 255), 0.85) -- 85% strength so it's obvious!
         end
     end
 end
@@ -122,17 +124,18 @@ Workspace.DescendantAdded:Connect(applyAnime)
 Lighting:ClearAllChildren()
 
 -- RTX Lighting settings
-Lighting.Technology = Enum.Technology.Future -- Forces the best lighting rendering for RTX vibes
+Lighting.Technology = Enum.Technology.Future
 Lighting.Ambient = Color3.fromRGB(70, 70, 70)
-Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
+Lighting.OutdoorAmbient = Color3.fromRGB(90, 90, 110)
 Lighting.Brightness = 3
 Lighting.ColorShift_Bottom = Color3.fromRGB(0, 0, 0)
-Lighting.ColorShift_Top = Color3.fromRGB(0, 0, 0)
+Lighting.ColorShift_Top = Color3.fromRGB(255, 180, 220) -- Light pink light
 Lighting.EnvironmentDiffuseScale = 1
 Lighting.EnvironmentSpecularScale = 1
 Lighting.GlobalShadows = true
-Lighting.ClockTime = 14.5
-Lighting.GeographicLatitude = 0
+Lighting.ShadowSoftness = 0.2
+Lighting.ClockTime = 14.0 -- Midday so the light isn't naturally orange
+Lighting.GeographicLatitude = 80 -- Pushes the sun down to the horizon for long shadows!
 Lighting.ExposureCompensation = 0
 
 -- Sky "Sky"
@@ -152,28 +155,26 @@ Sky1.SunTextureId = "rbxassetid://6196665106"
 Sky1.CelestialBodiesShown = true
 Sky1.Parent = Lighting
 
-
-
--- Atmosphere 1
+-- Atmosphere (Clean, very subtle blue volumetric fog for Anime RTX vibe)
 local Atmo1 = Instance.new("Atmosphere")
 Atmo1.Name = "Atmosphere"
-Atmo1.Density = 0 -- Set to 0 so it doesn't hide the Anime skybox with blue fog
+Atmo1.Density = 0.1
 Atmo1.Offset = 0.25
-Atmo1.Color = Color3.fromRGB(199, 199, 199)
-Atmo1.Decay = Color3.fromRGB(106, 112, 125)
-Atmo1.Glare = 0
-Atmo1.Haze = 0
+Atmo1.Color = Color3.fromRGB(199, 230, 255)
+Atmo1.Decay = Color3.fromRGB(106, 120, 150)
+Atmo1.Glare = 0.4
+Atmo1.Haze = 0.5
 Atmo1.Parent = Lighting
 
--- Bloom from Screenshot
+-- Bloom
 local Bloom = Instance.new("BloomEffect")
 Bloom.Enabled = true
-Bloom.Intensity = 1
-Bloom.Size = 24
-Bloom.Threshold = 2
+Bloom.Intensity = 1.2
+Bloom.Size = 28
+Bloom.Threshold = 1.0
 Bloom.Parent = Lighting
 
--- Depth of Field from Screenshot
+-- Depth of Field (DSLR RTX focus)
 local DepthOfField = Instance.new("DepthOfFieldEffect")
 DepthOfField.Enabled = true
 DepthOfField.FarIntensity = 0.1
@@ -182,18 +183,34 @@ DepthOfField.FocusDistance = 0.05
 DepthOfField.InFocusRadius = 30
 DepthOfField.Parent = Lighting
 
--- Color Correction from Screenshot
+-- Color Correction (Anime High Saturation & Contrast)
 local ColorCorrection = Instance.new("ColorCorrectionEffect")
 ColorCorrection.Enabled = true
-ColorCorrection.Brightness = 0
-ColorCorrection.Contrast = 0
-ColorCorrection.Saturation = 0
-ColorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
+ColorCorrection.Brightness = 0.02
+ColorCorrection.Contrast = 0.15
+ColorCorrection.Saturation = 0.35
+ColorCorrection.TintColor = Color3.fromRGB(255, 230, 240) -- Light pink tint for the whole scene
 ColorCorrection.Parent = Lighting
 
--- SunRays from Screenshot
+-- SunRays
 local SunRays = Instance.new("SunRaysEffect")
 SunRays.Enabled = true
-SunRays.Intensity = 0.01
-SunRays.Spread = 0.1
+SunRays.Intensity = 0.2
+SunRays.Spread = 0.5
 SunRays.Parent = Lighting
+
+-- RTX Terrain & Volumetric Clouds
+if Workspace:FindFirstChildOfClass("Terrain") then
+    Workspace.Terrain.Decoration = true
+    
+    for _, c in ipairs(Workspace.Terrain:GetChildren()) do
+        if c:IsA("Clouds") then c:Destroy() end
+    end
+    
+    local Clouds = Instance.new("Clouds")
+    Clouds.Name = "RTX_Clouds"
+    Clouds.Cover = 1.0 -- Extremely thick
+    Clouds.Density = 1.0 -- Extremely thick
+    Clouds.Color = Color3.fromRGB(255, 255, 255)
+    Clouds.Parent = Workspace.Terrain
+end
