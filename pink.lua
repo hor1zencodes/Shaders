@@ -182,13 +182,13 @@ Atmosphere.Offset = 0.3
 Atmosphere.Color = Color3.fromRGB(255, 170, 215)
 Atmosphere.Decay = Color3.fromRGB(160, 85, 145)
 Atmosphere.Glare = 0.55
-Atmosphere.Haze = 2.4
+Atmosphere.Haze = 0.2
 Atmosphere.Parent = Lighting
 
 -- Bloom (punchy glow)
 local Bloom = Instance.new("BloomEffect")
 Bloom.Enabled = true
-Bloom.Intensity = 1.6
+Bloom.Intensity = 0.6
 Bloom.Size = 28
 Bloom.Threshold = 0.85
 Bloom.Parent = Lighting
@@ -211,7 +211,7 @@ SunRays.Parent = Lighting
 
 -- Depth of Field (cinematic blur)
 local DepthOfField = Instance.new("DepthOfFieldEffect")
-DepthOfField.Enabled = true
+DepthOfField.Enabled = false
 DepthOfField.FarIntensity = 0.55
 DepthOfField.NearIntensity = 0.15
 DepthOfField.FocusDistance = 45
@@ -220,7 +220,7 @@ DepthOfField.Parent = Lighting
 
 -- Motion Blur (movement feel)
 local MotionBlur = Instance.new("BlurEffect")
-MotionBlur.Enabled = true
+MotionBlur.Enabled = false
 MotionBlur.Size = 6
 MotionBlur.Parent = Lighting
 
