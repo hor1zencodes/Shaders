@@ -118,8 +118,7 @@ local Workspace = game:GetService("Workspace")
 
 local function applyLightPink(part)
     if part:IsA("BasePart") or part:IsA("Terrain") then
-        local char = game.Players.LocalPlayer.Character
-        if char and part:IsDescendantOf(char) then return end
+        if isCharacterPart(part) then return end
         if part.Name == "ZenTile" then return end
 
         if part:IsA("Terrain") then

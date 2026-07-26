@@ -103,8 +103,7 @@ print(string.format("[Snapshot] Ready. Saved %d part colors, lighting, sky, atmo
 
 local function applyAnime(part)
     if part:IsA("BasePart") or part:IsA("Terrain") then
-        local char = game.Players.LocalPlayer.Character
-        if char and part:IsDescendantOf(char) then return end
+        if isCharacterPart(part) then return end
         if part.Name == "ZenTile" then return end
         if part:IsA("Terrain") then
             part.WaterColor = Color3.fromRGB(20, 100, 140)
