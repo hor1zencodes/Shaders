@@ -17,8 +17,8 @@ local function processPart(part)
         if not part:IsA("BasePart") then return end
         
         if isBaseplate(part) then
-            -- Lower the terrain visually by 0.2 studs so it doesn't clip above the floor
-            workspace.Terrain:FillBlock(part.CFrame * CFrame.new(0, -0.2, 0), part.Size, Enum.Material.Grass)
+            -- Lower the terrain visually by 0.8 studs so it doesn't clip above the floor
+            workspace.Terrain:FillBlock(part.CFrame * CFrame.new(0, -0.8, 0), part.Size, Enum.Material.Grass)
             
             -- Make the original baseplate invisible, but KEEP IT SOLID!
             -- This forces players to walk on the original floor, keeping height 100% accurate.
