@@ -6,9 +6,11 @@ if getgenv().TerrainAutoConverter then
 end
 
 local function isBaseplate(part)
+    if not part.CanCollide and part.Transparency == 1 then return false end
     local name = string.lower(part.Name)
     local isFloorName = string.find(name, "baseplate") or string.find(name, "floor") or string.find(name, "ground")
-    return ((part.Size.X > 100 and part.Size.Z > 100) or isFloorName) and part.Size.Y < 20
+    local isFlat = math.abs(part.CFrame.UpVector.Y) > 0.9
+    return ((part.Size.X > 100 and part.Size.Z > 100) or isFloorName) and part.Size.Y < 20 and isFlat
 end
 
 local function processPart(part)
@@ -38,7 +40,16 @@ if not foundAny then
 end
 
 getgenv().TerrainAutoConverter = workspace.DescendantAdded:Connect(function(part)
-    task.defer(function() processPart(part) end)
+    if part:IsA("BasePart") then
+        task.spawn(function()
+            task.wait(2) -- Wait for streaming LODs to resolve
+            if part.Parent then processPart(part) end
+        end)
+    end
 end)
 
 print("[Terrain] Successfully applied Snow terrain (StreamingEnabled supported)!")
+
+
+
+

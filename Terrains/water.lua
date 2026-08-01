@@ -6,9 +6,11 @@ if getgenv().TerrainAutoConverter then
 end
 
 local function isBaseplate(part)
+    if not part.CanCollide and part.Transparency == 1 then return false end
     local name = string.lower(part.Name)
     local isFloorName = string.find(name, "baseplate") or string.find(name, "floor") or string.find(name, "ground")
-    return ((part.Size.X > 100 and part.Size.Z > 100) or isFloorName) and part.Size.Y < 20
+    local isFlat = math.abs(part.CFrame.UpVector.Y) > 0.9
+    return ((part.Size.X > 100 and part.Size.Z > 100) or isFloorName) and part.Size.Y < 20 and isFlat
 end
 
 local function processPart(part)
@@ -27,18 +29,34 @@ local function processPart(part)
     end)
 end
 
-local foundAny = false
-for _, part in ipairs(workspace:GetDescendants()) do
-    if part:IsA("BasePart") and isBaseplate(part) then foundAny = true end
-    processPart(part)
+local function reapplyTerrain()
+    workspace.Terrain:Clear()
+    local foundAny = false
+    for _, p in ipairs(workspace:GetDescendants()) do
+        if p:IsA("BasePart") and isBaseplate(p) then
+            foundAny = true
+            processPart(p)
+        end
+    end
+    if not foundAny then
+        workspace.Terrain:FillBlock(CFrame.new(0,-2,0), Vector3.new(2000, 4, 2000), Enum.Material.Water)
+    end
 end
 
-if not foundAny then
-    workspace.Terrain:FillBlock(CFrame.new(0,-2,0), Vector3.new(2000, 4, 2000), Enum.Material.Water)
-end
+reapplyTerrain()
 
+local reapplyDebounce = false
 getgenv().TerrainAutoConverter = workspace.DescendantAdded:Connect(function(part)
-    task.defer(function() processPart(part) end)
+    if part:IsA("BasePart") then
+        if not reapplyDebounce then
+            reapplyDebounce = true
+            task.spawn(function()
+                task.wait(1.5)
+                reapplyTerrain()
+                reapplyDebounce = false
+            end)
+        end
+    end
 end)
 
 workspace.Terrain.WaterColor = Color3.fromRGB(0, 150, 255)
@@ -48,3 +66,7 @@ workspace.Terrain.WaterWaveSize = 0.15
 workspace.Terrain.WaterWaveSpeed = 15
 
 print("[Terrain] Successfully applied Water terrain (StreamingEnabled supported)!")
+
+
+
+
