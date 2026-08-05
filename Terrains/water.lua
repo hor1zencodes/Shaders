@@ -48,13 +48,17 @@ reapplyTerrain()
 local reapplyDebounce = false
 getgenv().TerrainAutoConverter = workspace.DescendantAdded:Connect(function(part)
     if part:IsA("BasePart") then
-        if not reapplyDebounce then
-            reapplyDebounce = true
-            task.spawn(function()
-                task.wait(1.5)
-                reapplyTerrain()
-                reapplyDebounce = false
-            end)
+        local name = string.lower(part.Name)
+        local isFloor = string.find(name, "baseplate") or string.find(name, "floor") or string.find(name, "ground")
+        if isFloor or part.Size.X > 50 or part.Size.Z > 50 then
+            if not reapplyDebounce then
+                reapplyDebounce = true
+                task.spawn(function()
+                    task.wait(1.5)
+                    reapplyTerrain()
+                    reapplyDebounce = false
+                end)
+            end
         end
     end
 end)

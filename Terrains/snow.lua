@@ -41,10 +41,16 @@ end
 
 getgenv().TerrainAutoConverter = workspace.DescendantAdded:Connect(function(part)
     if part:IsA("BasePart") then
-        task.spawn(function()
-            task.wait(2) -- Wait for streaming LODs to resolve
-            if part.Parent then processPart(part) end
-        end)
+        local name = string.lower(part.Name)
+        local isFloor = string.find(name, "baseplate") or string.find(name, "floor") or string.find(name, "ground")
+        if isFloor or part.Size.X > 50 or part.Size.Z > 50 then
+            task.spawn(function()
+                task.wait(2)
+                if part.Parent and isBaseplate(part) then
+                    processPart(part)
+                end
+            end)
+        end
     end
 end)
 
