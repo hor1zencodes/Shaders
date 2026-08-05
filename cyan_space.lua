@@ -3,18 +3,15 @@ local Lighting  = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 
 -- Wipe any old snapshot first
-getgenv().ORIGINAL_COLORS   = {}
+getgenv().ORIGINAL_COLORS   = setmetatable({}, {__mode = "k"})
 getgenv().ORIGINAL_LIGHTING = {}
 getgenv().ORIGINAL_WATER    = nil
 getgenv().ORIGINAL_SKY      = nil
 getgenv().ORIGINAL_ATMO     = nil
 
 local function isCharacterPart(part)
-    for _, plr in ipairs(Players:GetPlayers()) do
-        local char = plr.Character
-        if char and part:IsDescendantOf(char) then return true end
-    end
-    return false
+    local model = part:FindFirstAncestorOfClass("Model")
+    return model and model:FindFirstChildOfClass("Humanoid") ~= nil
 end
 
 -- ------------------------------------------------
@@ -31,15 +28,13 @@ for _, obj in ipairs(Workspace:GetDescendants()) do
 end
 
 Workspace.DescendantAdded:Connect(function(obj)
-    task.defer(function()
-        if obj:IsA("BasePart") and not isCharacterPart(obj) then
-            pcall(function()
-                if not getgenv().ORIGINAL_COLORS[obj] then
-                    getgenv().ORIGINAL_COLORS[obj] = obj.Color
-                end
-            end)
-        end
-    end)
+    if obj:IsA("BasePart") and not isCharacterPart(obj) then
+        pcall(function()
+            if not getgenv().ORIGINAL_COLORS[obj] then
+                getgenv().ORIGINAL_COLORS[obj] = obj.Color
+            end
+        end)
+    end
 end)
 
 -- ------------------------------------------------

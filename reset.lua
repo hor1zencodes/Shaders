@@ -153,11 +153,8 @@ end
 -- STEP 7: RESTORE PART COLORS FROM SNAPSHOT
 -- ================================================
 local function isCharacterPart(part)
-    for _, plr in ipairs(Players:GetPlayers()) do
-        local char = plr.Character
-        if char and part:IsDescendantOf(char) then return true end
-    end
-    return false
+    local model = part:FindFirstAncestorOfClass("Model")
+    return model and model:FindFirstChildOfClass("Humanoid") ~= nil
 end
 
 local snapshot = getgenv().ORIGINAL_COLORS
